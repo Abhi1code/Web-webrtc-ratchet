@@ -97,27 +97,31 @@ $(document).ready(function() {
     }
 
     function insertOffer(name, des) {
-        firebase.database().ref().child(name).child("offer").child("des").set(des);
+        if (des)
+            firebase.database().ref().child(name).child("offer").child("des").set(des);
     }
 
     function insertAnswer(name, des) {
-        firebase.database().ref().child(name).child("answer").child("des").set(des);
+        if (des)
+            firebase.database().ref().child(name).child("answer").child("des").set(des);
     }
 
     function insertLocalCandidate(name, cand) {
-        firebase.database().ref().child(name).child("localcandidate").set({
-            candidate: cand.candidate,
-            sdpMid: cand.sdpMid,
-            sdpMLineIndex: cand.sdpMLineIndex
-        });
+        if (cand)
+            firebase.database().ref().child(name).child("localcandidate").set({
+                candidate: cand.candidate,
+                sdpMid: cand.sdpMid,
+                sdpMLineIndex: cand.sdpMLineIndex
+            });
     }
 
     function insertRemoteCandidate(name, cand) {
-        firebase.database().ref().child(name).child("remotecandidate").set({
-            candidate: cand.candidate,
-            sdpMid: cand.sdpMid,
-            sdpMLineIndex: cand.sdpMLineIndex
-        });
+        if (cand)
+            firebase.database().ref().child(name).child("remotecandidate").set({
+                candidate: cand.candidate,
+                sdpMid: cand.sdpMid,
+                sdpMLineIndex: cand.sdpMLineIndex
+            });
     }
 
     function leave(name, flag) {
@@ -188,7 +192,8 @@ $(document).ready(function() {
 
                 if (event.candidate) {
                     insertLocalCandidate(name, event.candidate);
-                    insertRemoteCandidate(otherconn, event.candidate);
+                    if (otherconn)
+                        insertRemoteCandidate(otherconn, event.candidate);
                 }
 
             };
@@ -298,7 +303,8 @@ $(document).ready(function() {
     $('#hangUpBtn').click(function() {
         if (otherconn) {
             leave(name, true);
-            leave(otherconn, true);
+            if (otherconn)
+                leave(otherconn, true);
         }
     });
 
