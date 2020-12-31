@@ -76,6 +76,7 @@ $(document).ready(function() {
 
     $('#join').click(function() {
 
+<<<<<<< HEAD
         var name = $("#name").val();
         if (name !== "") {
             $('#join').prop('disabled', true);
@@ -103,6 +104,130 @@ $(document).ready(function() {
 
         } else {
 
+=======
+$(document).ready(function() {
+
+    var conn;
+    var name;
+    var localVideo = document.querySelector('#localVideo');
+    var remoteVideo = document.querySelector('#remoteVideo');
+    var yourConn;
+    var stream;
+    var otherconn;
+
+    //----------------------------------------------------------------------------------------------
+
+    //----------------------------------------------------------------------------------------------
+
+    conn.onmessage = function(e) {
+        console.log(e.data);
+        var data = JSON.parse(e.data);
+
+        switch (data.meta) {
+            case 'login':
+                login(data);
+                break;
+                //----------------------------------------------------------------------------------------------
+            case 'invaliduser':
+                otherconn = null;
+                $('#callBtn').prop('disabled', false);
+                alert(data.extra + ' Error!! User not exist');
+                break;
+                //----------------------------------------------------------------------------------------------
+            case 'handlecandidate':
+                handleCandidate(data.candidate);
+                break;
+                //----------------------------------------------------------------------------------------------
+            case 'handleoffer':
+                handleOffer(data.offer, data.sender);
+                break;
+                //----------------------------------------------------------------------------------------------
+            case 'handleanswer':
+                handleAnswer(data.answer);
+                break;
+                //----------------------------------------------------------------------------------------------
+            case 'handleleave':
+                handleLeave();
+                break;
+                //----------------------------------------------------------------------------------------------     
+            case 'error':
+                error();
+                break;
+                //----------------------------------------------------------------------------------------------
+            default:
+                error();
+                break;
+
+        }
+
+    };
+
+    function insertUser(name) {
+        var ref = firebase.database().ref().child(name);
+        ref.remove();
+        ref.child("init").set("Initiate").then(function() {
+            addSelfListener(name);
+            login({ status: 'true', name: name });
+        });
+    }
+
+    function addSelfListener(name) {
+        var ref = firebase.database().ref().child(name);
+        ref.child("offer").on('value', function(childSnapshot, prevChildKey) {
+            console.log(childSnapshot);
+            //handleOffer({ "type": "offer", "sdp": childSnapshot.val() });
+        });
+        ref.child("remotecandidate").on('value', function(childSnapshot, prevChildKey) {
+            console.log(childSnapshot);
+            //handleCandidate({ "type": "offer", "sdp": Snapshot.val() });
+        });
+    }
+
+    function addRemoteListener(rname) {
+        var ref = firebase.database().ref().child(rname);
+        ref.child("answer").on('value', function(childSnapshot, prevChildKey) {
+            console.log(childSnapshot);
+            //handleOffer({ "type": "offer", "sdp": childSnapshot.val() });
+        });
+        ref.child("localcandidate").on('value', function(childSnapshot, prevChildKey) {
+            console.log(childSnapshot);
+            //handleCandidate({ "type": "offer", "sdp": Snapshot.val() });
+        });
+    }
+
+    function insertOffer(name, des) {
+        firebase.database().ref().child(name).child("offer").child("des").set(des);
+    }
+
+    //----------------------------------------------------------------------------------------------
+
+    //----------------------------------------------------------------------------------------------
+
+    $('#join').click(function() {
+
+        var iname = $("#name").val();
+        if (iname !== "") {
+            $('#join').prop('disabled', true);
+            insertUser(iname);
+        }
+    });
+
+    //----------------------------------------------------------------------------------------------
+
+    function login(data) {
+
+        if (data.status === 'true') {
+
+            $("#login_page").hide();
+            $("#chat_room").show();
+            name = data.name;
+
+            //starting a peer connection
+            start_peer_conn();
+
+        } else {
+
+>>>>>>> f3c76f417e2f89056775889f468773f92f9f3dd2
             alert("oops..try a different username");
             $('#join').prop('disabled', false);
         }
@@ -182,8 +307,12 @@ $(document).ready(function() {
     //----------------------------------------------------------------------------------------------
 
     //when somebody sends us an offer 
+<<<<<<< HEAD
     function handleOffer(offer, name) {
         otherconn = name;
+=======
+    function handleOffer(offer) {
+>>>>>>> f3c76f417e2f89056775889f468773f92f9f3dd2
         yourConn.setRemoteDescription(new RTCSessionDescription(offer));
 
         //create an answer to an offer 
@@ -234,6 +363,7 @@ $(document).ready(function() {
             $('#callBtn').prop('disabled', true);
             otherconn = name;
             // create an offer
+<<<<<<< HEAD
             yourConn.createOffer(function(offer) {
 
                 send({
@@ -242,6 +372,13 @@ $(document).ready(function() {
                 });
 
                 yourConn.setLocalDescription(offer);
+=======
+            addRemoteListener(name);
+            yourConn.createOffer(function(offer) {
+
+                insertOffer(offer.sdp);
+                yourConn.setLocalDescription(name, offer);
+>>>>>>> f3c76f417e2f89056775889f468773f92f9f3dd2
 
             }, function(error) {
                 alert("Error when creating an offer");
@@ -277,4 +414,10 @@ $(document).ready(function() {
     };
     //----------------------------------------------------------------------------------------------
 
+<<<<<<< HEAD
 });
+=======
+});
+
+   
+>>>>>>> f3c76f417e2f89056775889f468773f92f9f3dd2
