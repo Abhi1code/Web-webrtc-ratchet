@@ -169,6 +169,30 @@ $(document).ready(function() {
 
     function start_peer_conn() {
         if (hasUserMedia()) {
+
+            //using Google public stun server 
+            var configuration = {
+                "iceServers": [{ "url": "stun:stun2.1.google.com:19302" }]
+            };
+
+            yourConn = new webkitRTCPeerConnection(configuration);
+
+            //when a remote user adds stream to the peer connection, we display it 
+            yourConn.onaddstream = function(e) {
+                remoteVideo.srcObject = (e.stream);
+                $('#callBtn').prop('disabled', true);
+            };
+
+            // Setup ice handling 
+            yourConn.onicecandidate = function(event) {
+
+                if (event.candidate) {
+                    insertLocalCandidate(name, event.candidate);
+                    insertRemoteCandidate(otherconn, event.candidate);
+                }
+
+            };
+
             //getting local video stream 
             navigator.webkitGetUserMedia({ video: true, audio: false }, function(myStream) {
                 stream = myStream;
@@ -178,31 +202,10 @@ $(document).ready(function() {
                 //localVideo.src = window.URL.createObjectURL(stream);
                 //localVideo.play();
 
-                //using Google public stun server 
-                var configuration = {
-                    "iceServers": [{ "url": "stun:stun2.1.google.com:19302" }]
-                };
-
-                yourConn = new webkitRTCPeerConnection(configuration);
-
                 // setup stream listening 
-                yourConn.addStream(stream);
+                if (stream)
+                    yourConn.addStream(stream);
 
-                //when a remote user adds stream to the peer connection, we display it 
-                yourConn.onaddstream = function(e) {
-                    remoteVideo.srcObject = (e.stream);
-                    $('#callBtn').prop('disabled', true);
-                };
-
-                // Setup ice handling 
-                yourConn.onicecandidate = function(event) {
-
-                    if (event.candidate) {
-                        insertLocalCandidate(name, event.candidate);
-                        insertRemoteCandidate(otherconn, event.candidate);
-                    }
-
-                };
 
             }, function(error) {
                 alert('something went wrong !!');
