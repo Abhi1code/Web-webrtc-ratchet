@@ -8,113 +8,6 @@ $(document).ready(function() {
     var stream;
     var otherconn;
 
-    conn = new WebSocket('ws://localhost:8282');
-
-    //----------------------------------------------------------------------------------------------
-
-    conn.onopen = function(e) {
-        console.log("Connection established!");
-
-    };
-
-    //----------------------------------------------------------------------------------------------
-
-    conn.onmessage = function(e) {
-        console.log(e.data);
-        var data = JSON.parse(e.data);
-
-        switch (data.meta) {
-            case 'login':
-                login(data);
-                break;
-                //----------------------------------------------------------------------------------------------
-            case 'invaliduser':
-                otherconn = null;
-                $('#callBtn').prop('disabled', false);
-                alert(data.extra + ' Error!! User not exist');
-                break;
-                //----------------------------------------------------------------------------------------------
-            case 'handlecandidate':
-                handleCandidate(data.candidate);
-                break;
-                //----------------------------------------------------------------------------------------------
-            case 'handleoffer':
-                handleOffer(data.offer, data.sender);
-                break;
-                //----------------------------------------------------------------------------------------------
-            case 'handleanswer':
-                handleAnswer(data.answer);
-                break;
-                //----------------------------------------------------------------------------------------------
-            case 'handleleave':
-                handleLeave();
-                break;
-                //----------------------------------------------------------------------------------------------     
-            case 'error':
-                error();
-                break;
-                //----------------------------------------------------------------------------------------------
-            default:
-                error();
-                break;
-
-        }
-
-    };
-
-    //----------------------------------------------------------------------------------------------
-
-    conn.onclose = function(e) {
-        console.log("Connection closed..");
-        $("#login_page").show();
-        $("#chat_room").hide();
-        name = "";
-        location.reload();
-    };
-
-    //----------------------------------------------------------------------------------------------
-
-    $('#join').click(function() {
-
-<<<<<<< HEAD
-        var name = $("#name").val();
-        if (name !== "") {
-            $('#join').prop('disabled', true);
-            var data = {
-                name: name,
-                meta: 'login'
-            };
-            conn.send(JSON.stringify(data));
-
-        }
-    });
-
-    //----------------------------------------------------------------------------------------------
-
-    function login(data) {
-
-        if (data.status === 'true') {
-
-            $("#login_page").hide();
-            $("#chat_room").show();
-            name = data.name;
-
-            //starting a peer connection
-            start_peer_conn();
-
-        } else {
-
-=======
-$(document).ready(function() {
-
-    var conn;
-    var name;
-    var localVideo = document.querySelector('#localVideo');
-    var remoteVideo = document.querySelector('#remoteVideo');
-    var yourConn;
-    var stream;
-    var otherconn;
-
     //----------------------------------------------------------------------------------------------
 
     //----------------------------------------------------------------------------------------------
@@ -227,7 +120,6 @@ $(document).ready(function() {
 
         } else {
 
->>>>>>> f3c76f417e2f89056775889f468773f92f9f3dd2
             alert("oops..try a different username");
             $('#join').prop('disabled', false);
         }
@@ -307,12 +199,7 @@ $(document).ready(function() {
     //----------------------------------------------------------------------------------------------
 
     //when somebody sends us an offer 
-<<<<<<< HEAD
-    function handleOffer(offer, name) {
-        otherconn = name;
-=======
     function handleOffer(offer) {
->>>>>>> f3c76f417e2f89056775889f468773f92f9f3dd2
         yourConn.setRemoteDescription(new RTCSessionDescription(offer));
 
         //create an answer to an offer 
@@ -363,22 +250,11 @@ $(document).ready(function() {
             $('#callBtn').prop('disabled', true);
             otherconn = name;
             // create an offer
-<<<<<<< HEAD
-            yourConn.createOffer(function(offer) {
-
-                send({
-                    meta: "offer",
-                    offer: offer
-                });
-
-                yourConn.setLocalDescription(offer);
-=======
             addRemoteListener(name);
             yourConn.createOffer(function(offer) {
 
                 insertOffer(offer.sdp);
                 yourConn.setLocalDescription(name, offer);
->>>>>>> f3c76f417e2f89056775889f468773f92f9f3dd2
 
             }, function(error) {
                 alert("Error when creating an offer");
@@ -413,11 +289,4 @@ $(document).ready(function() {
 
     };
     //----------------------------------------------------------------------------------------------
-
-<<<<<<< HEAD
 });
-=======
-});
-
-   
->>>>>>> f3c76f417e2f89056775889f468773f92f9f3dd2
