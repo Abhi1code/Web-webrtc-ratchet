@@ -58,11 +58,11 @@
         <video id="localVideo" autoplay></video>
         <video id="remoteVideo" autoplay></video>
 
-        <div class="row text-center">
-            <div class="col-md-12">
+        <div>
+            <div>
                 <input id="callToUsernameInput" type="text" placeholder="username to call" />
-                <button id="callBtn" class="btn-success btn" style="background-color: #00ff00;">Call</button>
-                <button id="hangUpBtn" class="btn-danger btn" style="background-color: #ff0000;">Hang Up</button>
+                <button id="callBtn" style="background-color: #00ff00;">Call</button>
+                <button id="hangUpBtn" style="background-color: #ff0000;">Hang Up</button>
             </div>
         </div>
 
