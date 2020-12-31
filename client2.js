@@ -12,7 +12,7 @@ $(document).ready(function() {
 
     //----------------------------------------------------------------------------------------------
 
-    conn.onmessage = function(e) {
+    /*conn.onmessage = function(e) {
         console.log(e.data);
         var data = JSON.parse(e.data);
 
@@ -53,7 +53,7 @@ $(document).ready(function() {
 
         }
 
-    };
+    };*/
 
     function insertUser(name) {
         var ref = firebase.database().ref().child(name);
@@ -67,29 +67,61 @@ $(document).ready(function() {
     function addSelfListener(name) {
         var ref = firebase.database().ref().child(name);
         ref.child("offer").on('value', function(childSnapshot, prevChildKey) {
-            console.log(childSnapshot);
-            //handleOffer({ "type": "offer", "sdp": childSnapshot.val() });
+            if (childSnapshot.val())
+                handleOffer({ "type": "offer", "sdp": childSnapshot.val().des });
         });
         ref.child("remotecandidate").on('value', function(childSnapshot, prevChildKey) {
-            console.log(childSnapshot);
-            //handleCandidate({ "type": "offer", "sdp": Snapshot.val() });
+            if (childSnapshot.val())
+                handleCandidate(childSnapshot.val());
+        });
+        ref.child("leave").on('value', function(childSnapshot, prevChildKey) {
+            if (childSnapshot.val() && childSnapshot.val().leave)
+                handleLeave();
         });
     }
 
     function addRemoteListener(rname) {
         var ref = firebase.database().ref().child(rname);
         ref.child("answer").on('value', function(childSnapshot, prevChildKey) {
-            console.log(childSnapshot);
-            //handleOffer({ "type": "offer", "sdp": childSnapshot.val() });
+            if (childSnapshot.val())
+                handleAnswer({ "type": "answer", "sdp": childSnapshot.val().des });
         });
         ref.child("localcandidate").on('value', function(childSnapshot, prevChildKey) {
-            console.log(childSnapshot);
-            //handleCandidate({ "type": "offer", "sdp": Snapshot.val() });
+            if (childSnapshot.val())
+                handleCandidate(childSnapshot.val());
+        });
+        ref.child("leave").on('value', function(childSnapshot, prevChildKey) {
+            if (childSnapshot.val() && childSnapshot.val().leave)
+                handleLeave();
         });
     }
 
     function insertOffer(name, des) {
         firebase.database().ref().child(name).child("offer").child("des").set(des);
+    }
+
+    function insertAnswer(name, des) {
+        firebase.database().ref().child(name).child("answer").child("des").set(des);
+    }
+
+    function insertLocalCandidate(name, cand) {
+        firebase.database().ref().child(name).child("localcandidate").set({
+            candidate: cand.candidate,
+            sdpMid: cand.sdpMid,
+            sdpMLineIndex: cand.sdpMLineIndex
+        });
+    }
+
+    function insertRemoteCandidate(name, cand) {
+        firebase.database().ref().child(name).child("remotecandidate").set({
+            candidate: cand.candidate,
+            sdpMid: cand.sdpMid,
+            sdpMLineIndex: cand.sdpMLineIndex
+        });
+    }
+
+    function leave(name, flag) {
+        firebase.database().ref().child(name).child("leave").child("leave").set(flag);
     }
 
     //----------------------------------------------------------------------------------------------
@@ -138,7 +170,7 @@ $(document).ready(function() {
     function start_peer_conn() {
         if (hasUserMedia()) {
             //getting local video stream 
-            navigator.webkitGetUserMedia({ video: true, audio: true }, function(myStream) {
+            navigator.webkitGetUserMedia({ video: true, audio: false }, function(myStream) {
                 stream = myStream;
 
                 //displaying local video stream on the page 
@@ -166,10 +198,8 @@ $(document).ready(function() {
                 yourConn.onicecandidate = function(event) {
 
                     if (event.candidate) {
-                        send({
-                            meta: "icecandidate",
-                            candidate: event.candidate,
-                        });
+                        insertLocalCandidate(name, event.candidate);
+                        insertRemoteCandidate(otherconn, event.candidate);
                     }
 
                 };
@@ -205,11 +235,7 @@ $(document).ready(function() {
         //create an answer to an offer 
         yourConn.createAnswer(function(answer) {
             yourConn.setLocalDescription(answer);
-
-            send({
-                meta: "answer",
-                answer: answer
-            });
+            insertAnswer(name, answer.sdp);
 
         }, function(error) {
             alert("Error when creating an answer");
@@ -253,8 +279,8 @@ $(document).ready(function() {
             addRemoteListener(name);
             yourConn.createOffer(function(offer) {
 
-                insertOffer(offer.sdp);
-                yourConn.setLocalDescription(name, offer);
+                insertOffer(name, offer.sdp);
+                yourConn.setLocalDescription(offer);
 
             }, function(error) {
                 alert("Error when creating an offer");
@@ -267,15 +293,10 @@ $(document).ready(function() {
     //---------------------------------------------------------------------------------------------
 
     $('#hangUpBtn').click(function() {
-
         if (otherconn) {
-            send({
-                meta: "leave"
-            });
-
-            handleLeave();
+            leave(name, true);
+            leave(otherconn, true);
         }
-
     });
 
     function handleLeave() {
@@ -286,7 +307,7 @@ $(document).ready(function() {
         yourConn.onicecandidate = null;
         yourConn.onaddstream = null;
         conn.close();
-
+        location.reload();
     };
     //----------------------------------------------------------------------------------------------
 });
