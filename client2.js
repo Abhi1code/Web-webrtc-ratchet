@@ -176,7 +176,11 @@ $(document).ready(function() {
 
             //using Google public stun server 
             var configuration = {
-                "iceServers": [{ "url": "stun:stun2.1.google.com:19302" }]
+                "iceServers": [{ url: "stun:stun2.1.google.com:19302" }, {
+                    url: 'turn:35.225.250.3:3478',
+                    credential: 'Abhi',
+                    username: 'Abhi'
+                }]
             };
 
             yourConn = new webkitRTCPeerConnection(configuration);
